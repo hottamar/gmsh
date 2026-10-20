@@ -6,7 +6,6 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
-#include <regex>
 #include <FL/Fl_Help_View.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Input.H>
@@ -16,6 +15,7 @@
 #include "FlGui.h"
 #include "inputValue.h"
 #include "helpWindow.h"
+#include "hintInput.h"
 #include "paletteWindow.h"
 #include "CommandLine.h"
 #include "StringUtils.h"
@@ -260,24 +260,12 @@ void help_options_cb(Fl_Widget *w, void *data)
   std::vector<std::string> s0;
   int diff = FlGui::instance()->help->modified->value();
   int help = FlGui::instance()->help->showhelp->value();
-  std::string search = FlGui::instance()->help->search->value();
+  FlGui::instance()->help->filter.set(FlGui::instance()->help->search);
 
   PrintOptions(0, GMSH_FULLRC, diff, help, nullptr, &s0);
 #if defined(HAVE_PARSER)
   PrintParserSymbols(help, s0);
 #endif
-
-  // the search, compiled once for all the lines (case-insensitive); a pattern
-  // that is not a valid regular expression matches nothing
-  std::regex pattern;
-  bool valid = true;
-  if(!search.empty()) {
-    try {
-      pattern = std::regex(search, std::regex_constants::icase);
-    } catch(...) {
-      valid = false;
-    }
-  }
 
   int top = FlGui::instance()->help->browser->topline();
   FlGui::instance()->help->browser->clear();
@@ -296,7 +284,7 @@ void help_options_cb(Fl_Widget *w, void *data)
     if(s0[i].size() > 256)
       s0[i].resize(256);
 
-    if(search.empty() || (valid && std::regex_search(s0[i], pattern)))
+    if(FlGui::instance()->help->filter.matches(s0[i]))
       FlGui::instance()->help->browser->add(s0[i].c_str(), d);
   }
   FlGui::instance()->help->browser->topline(top);
@@ -439,19 +427,13 @@ helpWindow::helpWindow()
     showhelp->callback(help_options_cb);
     showhelp->tooltip("Show help strings");
 
-    Fl_Group *o = new Fl_Group(3 * WB + 2 * BW, WB, BW, BH);
-    o->tooltip("Filter list using regular expression");
-    o->box(FL_DOWN_BOX);
-    o->color(FL_BACKGROUND2_COLOR);
-    search = new Fl_Input(3 * WB + 2 * BW + BH, WB + 2, BW - BH - 2, BH - 4,
-                          "@gmsh_search");
-    search->box(FL_FLAT_BOX);
-    search->callback(help_options_cb);
-    search->when(FL_WHEN_CHANGED);
+    search =
+      searchBox(3 * WB + 2 * BW, WB, BW, BH, "Search options and workspace",
+                "Show only the options and variables matching the regular\n"
+                "expression, whatever the case",
+                help_options_cb);
     // search->take_focus(); cannot call this here - it triggers show() on Linux
     // in fltk 1.3.3
-    o->resizable(search);
-    o->end();
 
     browser = new Fl_Browser(0, BH + 2 * WB, width, height - 2 * BH - 4 * WB);
     browser->box(GMSH_SIMPLE_TOP_BOX);

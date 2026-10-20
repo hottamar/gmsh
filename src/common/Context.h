@@ -273,10 +273,15 @@ public:
   int inputScrolling;
   // position and size of various windows in the GUI
   int glPosition[2], glSize[2], msgSize, menuSize[2], detachedMenu;
+  // the width of the dock of the tool windows, and the tools kept on the
+  // desktop instead, by name
+  int dockWidth;
+  std::string floatingTools;
   // positions of the other windows, relative to the graphic window
   int menuOffset[2], optOffset[2], visOffset[2], hotOffset[2], clipOffset[2],
-    manipOffset[2], statOffset[2], ctxOffset[2];
-  int pluginOffset[2], pluginSize[2], fieldOffset[2], fieldSize[2];
+    manipOffset[2], statOffset[2], ctxOffset[2], partOffset[2],
+    reclassifyOffset[2];
+  int pluginOffset[2], pluginSize[2], fieldOffset[2], fieldSize[2], optHeight;
   int fileChooserOffset[2], extraOffset[2], extraSize[2];
   // use the system menu bar on macOS?
   int systemMenuBar;

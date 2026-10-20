@@ -25,6 +25,9 @@ set(SRC
     fileDialogs.cpp
     extraDialogs.cpp
     windowPlacement.cpp
+    widthRules.cpp
+    toolDock.cpp
+    targetList.cpp
     classificationEditor.cpp
     partitionDialog.cpp
     inputValue.cpp
